@@ -1,0 +1,97 @@
+Given tables:
+
+★ tasks (id, name, status, project_id)
+
+★ projects (id, name)
+
+Write the queries for:
+
+1. get all statuses, not repeating, alphabetically ordered
+
+select distinct(status)
+from tasks
+order by status
+
+2. get the count of all tasks in each project, order by tasks count descending
+
+select	t1.id,
+	  t1.name,
+	  count(t2.id) as 'COUNT'
+from projects	as t1
+left join tasks	as t2 on t1.id = t2.project_id
+group by t1.id,
+	   t1.name
+order by COUNT DESC
+
+3. get the count of all tasks in each project, order by projects names
+
+select	t1.id,
+	  t1.name,
+	  count(t2.id) as 'COUNT'
+from projects	as t1
+left join tasks	as t2 on t1.id = t2.project_id
+group by t1.id,
+	   t1.name
+order by t1.name
+
+4. get the tasks for all projects having the name beginning with “N” letter
+
+select t1.name,
+	   t2.*
+from projects	as t1
+left join tasks	as t2 on t1.id = t2.project_id
+					  and t1.name LIKE 'N%'
+
+
+5. get the list of all projects containing the ‘a’ letter in the middle of the name, and
+
+show the tasks count near each project. Mention that there can exist projects without
+
+tasks and tasks with project_id=NULL
+
+select	t1.id,
+	  t1.name,
+	  count(t2.id) as 'COUNT'
+from projects	as t1
+full join tasks	as t2 on t1.id = t2.project_id
+					 and t1.name LIKE '%a%'
+group by t1.id,
+	   t1.name
+
+6. get the list of tasks with duplicate names. Order alphabetically
+
+select names
+from tasks
+group by names
+having count(names) > 1
+
+7. get the list of tasks having several exact matches of both name and status, from
+
+the project ‘Garage’. Order by matches count
+
+select name,
+	  status,
+	  count(*) as "COUNT"
+from tasks
+where project_id in (
+					select project_id
+					form project
+					where name = 'Garage'
+					)
+group by name,
+	   status
+having count(*) > 1
+order by COUNT
+
+8. get the list of project names having more than 10 tasks in status ‘completed’. Order
+
+by project_id
+
+select t1.project_id,
+	   t1.name
+from projects	as t1
+left join tasks	as t2 on t1.id = t2.project_id
+					 and t2.status = 'completed'
+group by t1.name
+having count(t1.name) > 10
+order by t1.project_id
